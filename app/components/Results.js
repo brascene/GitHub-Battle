@@ -27,7 +27,10 @@ function Results(props){
 
                 <div style={style.transparentBg} className="jumbotron col-sm-12">
                     <Link to="/playerOne">
-                        <button className="btn btn-lg btn-danger">Start again</button>
+                        <button className="btn btn-lg btn-danger" onClick={props.onStartAgain}>Start again</button>
+                    </Link>
+                    <Link to="/testProps">
+                        <button className="btn btn-lg btn-success">Test props on another route</button>
                     </Link>
                 </div>
 
@@ -39,7 +42,8 @@ function Results(props){
 Results.propTypes={
     isLoading: PropTypes.bool.isRequired,
     playersInfo: PropTypes.array.isRequired,
-    scores: PropTypes.array.isRequired
+    scores: PropTypes.array.isRequired,
+    onStartAgain: PropTypes.func.isRequired
 }
 
 module.exports = Results;

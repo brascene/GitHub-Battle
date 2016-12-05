@@ -1,54 +1,71 @@
 import React from 'react'
 import ConfirmBattle from '../components/ConfirmBattle'
-import githubHelpers from '../utils/githubHelpers'
+import {clearUsers} from '../redux/actions/userAction'
 
-export default React.createClass({
-    //contextTypes se dodaje da bi mogli baratati sa rutama
-    contextTypes: {
-        router: React.PropTypes.object.isRequired
-    },
-    getInitialState: function(){
-        return {
-          isLoading: true,
-          playerInfo: []
-      }
-    },
-    componentWillMount: function(){
-        console.log("Component will mount");
-    },
-    componentDidMount: function(){
-        var query = this.props.location.query;
-        var states = this;
-        githubHelpers.getPlayersInfo([query.playerOne,query.playerTwo])
-            .then(function(players){
-                states.setState({
-                    isLoading: false,
-                    playerInfo: [players[0],players[1]]
-                })
+import {connect} from 'react-redux'
+
+class ConfirmBattleContainer extends React.Component{
+    constructor(props,context){
+        super(props,context);
+        this.state={
+            isLoading: true,
+            playerInfo: []
+        }
+    }
+    componentDidUpdate(prevProps,prevState){
+        console.log("Component did mount: ",this.props.user)
+    }
+    componentWillReceiveProps(nextProps){
+        if(nextProps.user.fetched){
+            this.setState({
+                isLoading: !nextProps.user.fetched,
+                playerInfo: nextProps.user.users
             })
-    },
-    componentWillReceiveProps: function(){
-        console.log("Component will receive props");
-    },
-    componentWillMount: function(){
-            window.scrollTo(0, 0);
-    },
-    handleInitiateBattle: function(){
+        }
+    }
+    componentWillUnmount(){
+        console.log("Battle component will unmount")
+        console.log("Routing: ", this.props.routing)
+        //this.props.dispatch(clearUsers())
+    }
+    componentWillMount(){
+        window.scrollTo(0, 0);
+    }
+    handleInitiateBattle(){
         this.context.router.push({
             pathname:'/results',
             state: {
                 playerInfo: this.state.playerInfo
             }
         })
-    },
-    render(){
-        return (
-            <div>
-                <ConfirmBattle
-                    isLoading={this.state.isLoading}
-                    onInitiateBattle={this.handleInitiateBattle}
-                    playersInfo={this.state.playerInfo}></ConfirmBattle>
-            </div>
-        )
     }
-})
+    handleStartAgain(){
+        this.props.dispatch(clearUsers())
+    }
+    render(){
+            return (
+                <div>
+                    <ConfirmBattle
+                        isLoading={this.state.isLoading}
+                        onInitiateBattle={this.handleInitiateBattle.bind(this)}
+                        playersInfo={this.state.playerInfo}
+                        onStartAgain={this.handleStartAgain.bind(this)}>
+                    </ConfirmBattle>
+                </div>
+            )
+        }
+}
+
+ConfirmBattleContainer.contextTypes = {
+    router: function() { return React.PropTypes.func.isRequired; }
+};
+
+
+function mapStateToProps(state){
+    return {
+        routing: state.routing,
+        user: state.users
+    }
+}
+
+export default connect(mapStateToProps)(ConfirmBattleContainer)
